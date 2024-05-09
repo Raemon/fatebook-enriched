@@ -34,15 +34,17 @@ function App() {
   const [apiKey, setApiKey] = useState(localStorage.getItem('fatebookApiKey') ?? "")
   console.log(localStorage.getItem('fatebookApiKey'))
 
+  const {results, isLoading, error} = useFetchQuestions(apiKey)
 
-  const responseGoogle = (response: any) => {
-    console.log(response);
+  const questions = results?.length > 0 ? results : JSON.parse(localStorage.getItem('questions') || '[]')
+  localStorage.setItem('questions', JSON.stringify(questions));
+
+  const handleSetApiKey = () => {
+    setApiKey(apiKeyInput)
+    localStorage.setItem('fatebookApiKey', apiKeyInput)
   }
 
-  const {results, isLoading, error} = useFetchQuestions(apiKey)
-  console.log(error)
-
-  if (!apiKey || error) {
+  if (!apiKey || questions.length === 0) {
     return <div className={classes.apiKey}>
         <h2>Enter your Fatebook API key</h2>
         <p><em>(it'll be stored locally on your machine)</em></p>
@@ -50,17 +52,15 @@ function App() {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApiKeyInput(e.target.value)} 
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
           if (e.key === 'Enter') {
-            setApiKey(apiKeyInput)
+            handleSetApiKey()
           }
         }} />
-        <button onClick={() => localStorage.setItem('fatebookApiKey', apiKeyInput)}>Submit</button>
+        <button onClick={() => handleSetApiKey()}>Submit</button>
         <p>You can get your API key from the <a href="https://fatebook.io/api-setup" target="_blank">Fatebook API page</a></p>
+        <p>{error?.message}</p>
       </div>
   }
 
-  const questions = results?.length > 0 ? results : JSON.parse(localStorage.getItem('questions') || '[]')
-  localStorage.setItem('questions', JSON.stringify(questions));
-  console.log(localStorage.getItem('questions'))
   return (
     <div className={classes.root}>
       <div className={classes.left}>

@@ -62,7 +62,7 @@ export const useFetchQuestions = (apiKey: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-
+  console.log("error", error)
   useEffect(() => {
     console.log("running")
 
@@ -82,6 +82,7 @@ export const useFetchQuestions = (apiKey: string) => {
     };
     fetchQuestions();
   }, [apiKey]);
+  console.log("error2", error)
 
 
   return { results: questions, isLoading, error };
