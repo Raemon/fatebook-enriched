@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import PredictionsList from './Components/PredictionsList';
-import { GoogleLogin } from 'react-google-login';
 import NewQuestionForm from './Components/NewQuestionForm';
 import { useFetchQuestions } from './useFatebook';
 import CalibrationGraph from './Components/CalibrationGraph';
