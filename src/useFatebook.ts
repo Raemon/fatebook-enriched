@@ -14,6 +14,7 @@ export interface Forecast {
   forecast: string;
   probability?: number;
   createdAt: string;
+  user?: User;
 }
 
 export interface Question {
@@ -28,7 +29,7 @@ export interface Question {
   pingedForResolution: boolean;
   profileId: string | null;
   questionMessages: string[];
-  resolution: string;
+  resolution: 'YES' | 'NO' | 'AMBIGUOUS' | null;
   resolveBy: string;
   resolved: boolean;
   resolvedAt: string;
@@ -55,6 +56,7 @@ export interface Tag {
   id: string;
   name: string;
   createdAt: string;
+  count?: number;
 }
 
 export const useFetchQuestions = (apiKey: string) => {
@@ -62,7 +64,6 @@ export const useFetchQuestions = (apiKey: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  console.log("error", error)
   useEffect(() => {
     console.log("running")
 
@@ -82,7 +83,6 @@ export const useFetchQuestions = (apiKey: string) => {
     };
     fetchQuestions();
   }, [apiKey]);
-  console.log("error2", error)
 
 
   return { results: questions, isLoading, error };
@@ -112,10 +112,13 @@ export const useSubmitQuestion = (apiKey: string) => {
     setSubmitError(null);
     setSubmitSuccess(false);
 
+    const defaultDate = new Date()
+    defaultDate.setDate(defaultDate.getDate() + 1)
+
     const queryParams = new URLSearchParams({
       apiKey: apiKey,
       title: questionData.title,
-      ...(questionData.resolveBy && { resolveBy: questionData.resolveBy }),
+      resolveBy: !!questionData.resolveBy ? questionData.resolveBy : defaultDate.toISOString(),
       ...(questionData.forecast && { forecast: questionData.forecast.toString() }),
       ...(questionData.sharePublicly && { sharePublicly: questionData.sharePublicly ? 'yes' : 'no' }),
       ...(questionData.hideForecastsUntil && { hideForecastsUntil: questionData.hideForecastsUntil }),
@@ -127,6 +130,7 @@ export const useSubmitQuestion = (apiKey: string) => {
 
     const url = `https://fatebook.io/api/v0/createQuestion?${queryParams.toString()}`;
 
+    console.log(url)
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -147,6 +151,7 @@ export const useSubmitQuestion = (apiKey: string) => {
       setIsSubmitting(false);
     }
   };
+  console.log("submitError", submitError)
 
   return { submitQuestion, isSubmitting, submitError, submitSuccess };
 };

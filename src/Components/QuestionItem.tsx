@@ -1,35 +1,24 @@
 import React from 'react';
 import { createUseStyles } from 'react-jss';
 import { Question } from '../useFatebook';
+import classNames from 'classnames';
 
 const questionItemStyles = createUseStyles({
   root: {
-    display: 'flex',
-    alignItems: 'top',
-    gap: '50px',
+    padding: 10,
+    width: '100%',
     borderBottom: "1px solid #dedede",
-    marginBottom: 25
   },
-  questionContainer: {
-    width: "50%",
-    padding: '5px',
-    margin: '5px',
-    fontSize: '0.8rem',
-    '& h4': {
-      fontSize: 14,
-      margin: '0',
-      marginBottom: 10,
-      fontWeight: 500
-    }
-  },
-  details: {
+  main: {
     display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: '10px',
-    fontSize: 12,
-    color: 'gray'
+    alignItems: "center",
+    gap: 10,
+    fontSize: '0.8rem',
+  },
+  title: {
+    fontWeight: 600,
+    fontSize: 14,
+    marginBottom: 6,
   },
   userImage: {
     width: 30,
@@ -37,10 +26,25 @@ const questionItemStyles = createUseStyles({
     borderRadius: '50%'
   },
   forecastContainer: {
-    width: "50%",
-    padding: '5px',
-    margin: '5px',
-    fontSize: '0.8rem'
+    display: 'flex',
+    gap: '5px'
+  },
+  resolution: {
+    fontSize: 12,
+    padding: '2px 4px',
+    borderRadius: 3,
+  },
+  YES: {
+    color: 'green'
+  },
+  NO: {
+    color: 'red'
+  },
+  AMBIGUOUS: {
+    color: 'orange'
+  },
+  forecast: {
+    fontSize: 11,
   }
 });
 
@@ -51,32 +55,36 @@ interface QuestionItemProps {
 const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
   const classes = questionItemStyles();
 
+  let resolutionPhrase = "Unresolved";
+  let resolutionColor = 'rgba(0, 0, 0, 0.1)';
+  switch (question.resolution) {
+    case 'AMBIGUOUS':
+      resolutionPhrase = "UNCLEAR";
+      resolutionColor = 'rgba(255, 165, 0, 0.2)';
+      break;
+    case 'YES':
+      resolutionPhrase = "YES";
+      resolutionColor = 'rgba(0, 128, 0, 0.2)';
+      break;
+    case 'NO':
+      resolutionPhrase = "NO";
+      resolutionColor = 'rgba(255, 0, 0, 0.2)';
+      break;
+  }
+
+
   return (
     <div className={classes.root} onClick={() => console.log(question)}>
-      <div className={classes.questionContainer}>
-        <h4>{question.title}</h4>
-        <div className={classes.details}>
-          <span>{new Date(question.createdAt).toLocaleDateString()}</span>
-          <span>Resolved: {question.resolved ? "Yes" : "No"}</span>
-          {question.resolution && <span>Resolution: {question.resolution}</span>}
-          {/* {question.user && (
-            <div>
-              <img src={question.user.image} alt={question.user.name} className={classes.userImage} />
-              <span>Posted by: {question.user.name}</span>
-            </div>
-          )} */}
-        </div>
-        <div className={classes.forecastContainer}>
+      <div className={classes.title}>{question.title}</div>
+      <div className={classes.main}>
+        <span className={classes.resolution} style={{background: resolutionColor}}>
+          {resolutionPhrase}
+        </span>
         {question.forecasts.map(forecast => (
-            <div key={forecast.id}>
-              <span>Outcome: {forecast.outcome}</span>
-              <span>Probability: {forecast.probability}%</span>
-            </div>
-          ))}
+            <span className={classes.forecast} key={forecast.id}>{forecast.forecast ? parseFloat(forecast.forecast)*100+"%" : ""}</span>
+        ))}
       </div>
-        {question.comments.map(comment => <div>{comment.comment}</div>)}
-      </div>
-
+      {question.comments.map(comment => <div>{comment.comment}</div>)}
     </div>
   );
 };

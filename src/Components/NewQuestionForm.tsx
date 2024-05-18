@@ -1,26 +1,20 @@
 import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { useSubmitQuestion, SubmitQuestionData } from '../useFatebook';
-import TagInput from './InputWithDropdown';
+import { useSubmitQuestion, SubmitQuestionData, Tag } from '../useFatebook';
 import InputWithDropdown from './InputWithDropdown';
+import Row from './common/Row';
 
 const useStyles = createUseStyles({
   form: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    maxWidth: '500px',
     margin: '20px auto',
-    padding: '20px',
-    border: '1px solid #ccc',
     borderRadius: '8px',
-    backgroundColor: '#f9f9f9',
+    maxWidth: '600px',
   },
   input: {
-    marginBottom: '10px',
     padding: '10px',
     fontSize: '16px',
     borderRadius: '4px',
+    flexGrow: 1,
     border: '1px solid #ccc',
   },
   button: {
@@ -40,9 +34,20 @@ const useStyles = createUseStyles({
     fontSize: '14px',
     marginTop: '10px',
   },
+  tags: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
+  },
+  tag: {
+    padding: '5px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    borderRadius: '4px',
+  }
 });
 
-const NewQuestionForm = ({apiKey}: {apiKey: string}) => {
+const NewQuestionForm = ({apiKey, tags}: {apiKey: string, tags: Tag[]}) => {
   const classes = useStyles();
   const { submitQuestion, isSubmitting, submitError, submitSuccess } = useSubmitQuestion(apiKey);
   const [formData, setFormData] = useState<SubmitQuestionData>({
@@ -56,6 +61,7 @@ const NewQuestionForm = ({apiKey}: {apiKey: string}) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log(name, value)
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -64,38 +70,49 @@ const NewQuestionForm = ({apiKey}: {apiKey: string}) => {
     await submitQuestion(formData);
   };
 
+  const handleEnterTag = (value: string) => {
+    setFormData((prevFormData: SubmitQuestionData) => ({...prevFormData, tags: [...prevFormData.tags ?? [], value]}));
+  }
+
   return (
-    <form className={classes.form} onSubmit={handleSubmit}>
-      <input
-        className={classes.input}
-        type="text"
-        name="title"
-        placeholder="Question Title"
-        value={formData.title}
-        onChange={handleChange}
-        required
-      />
-      <input
-        className={classes.input}
-        type="number"
-        name="forecast"
-        placeholder="Forecast Probability"
-        value={formData.forecast}
-        onChange={handleChange}
-        step="0.01"
-        min="0"
-        max="1"
-      />
-      <InputWithDropdown 
-        list={[{name: "apple", count: 1}, {name: "banana", count: 2}]}
-        placeholder='tags'
-        handleEnter={(value) => setFormData((prevFormData: SubmitQuestionData) => ({...prevFormData, tags: [...prevFormData.tags ?? [], value]}))} />
-      <button className={classes.button} type="submit" disabled={isSubmitting}>
-        Submit Question
-      </button>
-      {submitError && <div className={classes.error}>{submitError.message}</div>}
-      {submitSuccess && <div className={classes.error} style={{ color: 'green' }}>Question submitted successfully!</div>}
-    </form>
+    <div className={classes.form} onSubmit={handleSubmit}>
+      <Row justifyContent='space-between' gap="10px">
+        <input
+          className={classes.input}
+          type="text"
+          name="title"
+          placeholder="Question Title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+        />
+        <input
+          className={classes.input}
+          type="number"
+          name="forecast"
+          placeholder="Probability"
+          value={formData.forecast}
+          onChange={handleChange}
+          step="0.01"
+          min="0"
+          max="1"
+        />
+        <button className={classes.button} type="submit" disabled={isSubmitting} onClick={handleSubmit}>
+          Submit
+        </button>
+        {submitError && <div className={classes.error}>{submitError.message}</div>}
+        {submitSuccess && <div className={classes.error} style={{ color: 'green' }}>Question submitted successfully!</div>}
+      </Row>
+      <Row>
+        <div className={classes.tags}>{formData.tags?.map((tag) => <div>
+          {tag}</div>)}
+        </div>
+        <InputWithDropdown 
+          list={tags.map(tag => ({name: tag.name, count: tag.count ?? 1}))}
+          placeholder='tags'
+          handleEnter={(value) => setFormData((prevFormData: SubmitQuestionData) => ({...prevFormData, tags: [...prevFormData.tags ?? [], value]}))} />
+      </Row>
+    </div>
   );
 };
 

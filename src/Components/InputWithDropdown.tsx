@@ -18,14 +18,26 @@ const InputWithDropdown = ({handleEnter, list, placeholder}:{handleEnter: (value
   const filteredSuggestions = list.filter(item => item.name.includes(inputValue)).sort((a, b) => b.count - a.count).slice(0, 10)
   return (
     <>
-        <input className={classes.root} value={inputValue} list="suggestions" placeholder={placeholder} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleEnter(inputValue)
+        <input 
+          className={classes.root} 
+          value={inputValue} 
+          list="suggestions" 
+          placeholder={placeholder} 
+          onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleEnter(inputValue)
+              setInputValue("")
+            }
           }
-        }}/>
+        }/>
         <datalist id="suggestions">
           {filteredSuggestions.map(item => (
-            <option key={item.name} value={item.name}>{item.name}</option>
+            <option 
+              key={item.name} value={item.name} 
+              onClick={() => { setInputValue(""); handleEnter(inputValue)}}
+            >
+              {item.name}
+            </option>
           ))}
         </datalist>
     </>

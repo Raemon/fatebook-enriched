@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import PredictionsList from './Components/PredictionsList';
+import QuestionsList from './Components/QuestionsList';
 import NewQuestionForm from './Components/NewQuestionForm';
-import { useFetchQuestions } from './useFatebook';
+import { Question, Tag, useFetchQuestions } from './useFatebook';
 import CalibrationGraph from './Components/CalibrationGraph';
+import countBy from 'lodash/countBy';
 
 const useStyles = createUseStyles({
   root: {
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "space-around",
     flexDirection: "row",
-    padding: 30
+    padding: 30,
+    fontFamily: `"Inter var", ui-sans-serif, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`
   },
   left: {
-    width: "40%"
+    width: "calc(50% - 60px)"
   },
   right: {
-    width: "40%"
+    width: "calc(50% - 60px)"
   },
   apiKey: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    height: "80vh"
+    height: "100vh"
   }
 });
 
@@ -37,6 +39,22 @@ function App() {
 
   const questions = results?.length > 0 ? results : JSON.parse(localStorage.getItem('questions') || '[]')
   localStorage.setItem('questions', JSON.stringify(questions));
+  
+  const allTags = questions.flatMap((question: Question) => question.tags)
+  const tags = allTags.reduce((acc: Tag[], tag: Tag) => {
+    const existingTag = acc.find(t => t.name === tag.name);
+    if (existingTag) {
+      if (existingTag.count) {
+        existingTag.count += 1;
+      } else {
+        existingTag.count = 1;
+      }
+    } else {
+      acc.push({ ...tag, count: 1 });
+    }
+    return acc;
+  }, []);
+
 
   const handleSetApiKey = () => {
     setApiKey(apiKeyInput)
@@ -62,12 +80,12 @@ function App() {
 
   return (
     <div className={classes.root}>
-      <div className={classes.left}>
-        <NewQuestionForm apiKey={apiKey} />
-        <PredictionsList questions={questions} />
-      </div>
       <div className={classes.right}>
-        <CalibrationGraph questions={questions} />
+        <CalibrationGraph questions={questions} tags={tags} />
+      </div>
+      <div className={classes.left}>
+        <NewQuestionForm apiKey={apiKey} tags={tags} />
+        <QuestionsList questions={questions} />
       </div>
     </div>
   );

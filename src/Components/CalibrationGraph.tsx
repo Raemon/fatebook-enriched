@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { createUseStyles } from "react-jss";
-import { Forecast, Question } from '../useFatebook';
+import { Forecast, Question, Tag } from '../useFatebook';
 import groupBy from 'lodash/groupBy';
+import Tooltip from './common/Tooltip';
 
 const useStyles = createUseStyles({
   root: {
@@ -26,7 +27,6 @@ const useStyles = createUseStyles({
     display: "flex",
     justifyContent: "center",
     flexWrap: "wrap",
-    maxWidth: 600,
     marginBottom: 25,
     gap: 4
   },
@@ -55,7 +55,7 @@ const useStyles = createUseStyles({
   }
 });
 
-const CalibrationGraph = ({questions}:{questions: Question[]}): JSX.Element => {
+const CalibrationGraph = ({questions, tags}:{questions: Question[], tags: Tag[]}): JSX.Element => {
   const classes = useStyles();
 
   const forecasts = questions.flatMap(question => question.forecasts.map(forecast => ({
@@ -69,8 +69,7 @@ const CalibrationGraph = ({questions}:{questions: Question[]}): JSX.Element => {
   const [selectedYears, setSelectedYears] = useState<string[]>([])
   const filteredForecasts = (selectedYears.length > 0) ? forecasts.filter(forecast => selectedYears.includes(forecast.createdAt.split("-")[0])) : forecasts
 
-  const allTags = questions.flatMap((question) => question.tags)
-  const tagsByName = groupBy(allTags, (tag) => tag.name)
+  const tagsByName = groupBy(tags, (tag) => tag.name)
 
   const handleYearClick = (year: string) => {
     if (selectedYears && selectedYears.includes(year)) {
@@ -158,13 +157,12 @@ const CalibrationGraph = ({questions}:{questions: Question[]}): JSX.Element => {
           const bottom = `${calibrationByDecileProbability[probability].result}%`;
           const left = `${parseFloat(probability)*10}%`;
           return (
-            <span key={probability} className={classes.bigDot} title={`forecast: ${probability}0%, result: ${calibrationByDecileProbability[probability].result}%, count: ${calibrationByDecileProbability[probability].count}`}
-              style={{
-                bottom, 
-                left,  
-                background: `rgba(100,0,200, ${calibrationByDecileProbability[probability].density})`
-              }}
-            />
+            <Tooltip text={`forecast: ${probability}0%, result: ${calibrationByDecileProbability[probability].result}%, count: ${calibrationByDecileProbability[probability].count}`}>
+              <span key={probability} className={classes.bigDot} style={{ bottom, left,  
+                  background: `rgba(100,0,200, ${calibrationByDecileProbability[probability].density})`
+                }}
+              />
+            </Tooltip>
           );
         })}
         <svg style={{position: "absolute", width: "100%", height: "100%", top: 0, left: 0}}>
