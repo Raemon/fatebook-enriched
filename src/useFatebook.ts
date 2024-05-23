@@ -1,106 +1,34 @@
 import { useState, useEffect } from 'react';
-
-export interface User {
-  id: string;
-  name: string;
-  createdAt: string;
-  image: string;
-}
-
-export interface Forecast {
-  // Assuming properties for the Forecast object, add specific types as needed
-  id: string;
-  outcome: string;
-  forecast: string;
-  probability?: number;
-  createdAt: string;
-  user?: User;
-}
-
-export interface Question {
-  id: string;
-  createdAt: string;
-  comment: Comment | null;
-  comments: Comment[];
-  forecasts: Forecast[];
-  hideForecastsUntil: string | null;
-  hideForecastsUntilPrediction: boolean;
-  notes: string | null;
-  pingedForResolution: boolean;
-  profileId: string | null;
-  questionMessages: string[];
-  resolution: 'YES' | 'NO' | 'AMBIGUOUS' | null;
-  resolveBy: string;
-  resolved: boolean;
-  resolvedAt: string;
-  sharedPublicly: boolean;
-  sharedWith: string[];
-  sharedWithLists: string[];
-  tags: Tag[];
-  title: string;
-  unlisted: boolean;
-  user: User;
-  userId: string;
-}
-
-export interface Comment {
-  id: string;
-  createdAt: string;
-  comment: string;
-  questionId: string;
-  user: User;
-  userId: string;
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-  createdAt: string;
-  count?: number;
-}
+import { Question, SubmitQuestionData } from './types';
 
 export const useFetchQuestions = (apiKey: string) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch(`https://fatebook.io/api/v0/getQuestions?apiKey=${apiKey}&limit=1000`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch questions');
+      }
+      const data = await response.json();
+      setQuestions(data.items);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log("running")
-
-    const fetchQuestions = async () => {
-      try {
-        const response = await fetch(`https://fatebook.io/api/v0/getQuestions?apiKey=${apiKey}&limit=1000`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions');
-        }
-        const data = await response.json();
-        setQuestions(data.items);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchQuestions();
   }, [apiKey]);
 
 
-  return { results: questions, isLoading, error };
+  return { results: questions, isLoading, error, fetchQuestions };
 };
-
-
-
-export interface SubmitQuestionData {
-  title: string;
-  description: string;
-  resolveBy?: string;
-  forecast?: number;
-  tags?: string[];
-  sharePublicly?: boolean;
-  shareWithLists?: string[];
-  shareWithEmail?: string[];
-  hideForecastsUntil?: string;
-}
 
 export const useSubmitQuestion = (apiKey: string) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -139,7 +67,7 @@ export const useSubmitQuestion = (apiKey: string) => {
         },
         body: JSON.stringify({ description: questionData.description }),
       });
-
+      console.log(response.json())
       if (!response.ok) {
         throw new Error('Failed to submit question');
       }

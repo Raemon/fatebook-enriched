@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import QuestionsList from './Components/QuestionsList';
 import NewQuestionForm from './Components/NewQuestionForm';
-import { Question, Tag, useFetchQuestions } from './useFatebook';
+import { useFetchQuestions } from './useFatebook';
+import { Question, Tag } from './types';
 import CalibrationGraph from './Components/CalibrationGraph';
 import countBy from 'lodash/countBy';
+import groupBy from 'lodash/groupBy';
+import CalibrationByPeriod from './Components/CalibrationByPeriod';
+import CalibrationInfo from './Components/CalibrationInfo';
 
 const useStyles = createUseStyles({
   root: {
@@ -30,17 +34,23 @@ const useStyles = createUseStyles({
 });
 
 function App() {
+
+  try {
+
+  } catch (e) {
+    console.log(e)
+  }
   const classes = useStyles();
   const [apiKeyInput, setApiKeyInput] = useState("")
   const [apiKey, setApiKey] = useState(localStorage.getItem('fatebookApiKey') ?? "")
-  console.log(localStorage.getItem('fatebookApiKey'))
 
-  const {results, isLoading, error} = useFetchQuestions(apiKey)
+  const {results, fetchQuestions, isLoading, error} = useFetchQuestions(apiKey)
 
   const questions = results?.length > 0 ? results : JSON.parse(localStorage.getItem('questions') || '[]')
   localStorage.setItem('questions', JSON.stringify(questions));
   
   const allTags = questions.flatMap((question: Question) => question.tags)
+
   const tags = allTags.reduce((acc: Tag[], tag: Tag) => {
     const existingTag = acc.find(t => t.name === tag.name);
     if (existingTag) {
@@ -54,7 +64,6 @@ function App() {
     }
     return acc;
   }, []);
-
 
   const handleSetApiKey = () => {
     setApiKey(apiKeyInput)
@@ -78,14 +87,16 @@ function App() {
       </div>
   }
 
+  const resolvedQuestions = questions.filter((question: Question) => question.resolution === "YES" || question.resolution === "NO")
+
   return (
     <div className={classes.root}>
       <div className={classes.right}>
-        <CalibrationGraph questions={questions} tags={tags} />
+        <CalibrationInfo questions={resolvedQuestions} tags={tags} />
       </div>
       <div className={classes.left}>
-        <NewQuestionForm apiKey={apiKey} tags={tags} />
-        <QuestionsList questions={questions} />
+        <NewQuestionForm apiKey={apiKey} tags={tags} fetchQuestions={fetchQuestions} />
+        <QuestionsList questions={questions} tags={tags}/>
       </div>
     </div>
   );

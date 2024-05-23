@@ -12,10 +12,10 @@ const useStyles = createUseStyles({
   }
 });
 
-const InputWithDropdown = ({handleEnter, list, placeholder}:{handleEnter: (value: string) => void, list: {name: string, count: number}[], placeholder?: string}): JSX.Element => {
+const InputWithDropdown = ({handleEnter, handleDelete, list, placeholder}:{handleEnter: (value: string) => void, handleDelete?: () => void, list: {name: string, count: number}[], placeholder?: string}): JSX.Element => {
   const classes = useStyles();
   const [inputValue, setInputValue] = useState("")
-  const filteredSuggestions = list.filter(item => item.name.includes(inputValue)).sort((a, b) => b.count - a.count).slice(0, 10)
+  const filteredSuggestions = list.filter(item => item.name.toLowerCase().includes(inputValue.toLowerCase())).sort((a, b) => b.count - a.count).slice(0, 10)
   return (
     <>
         <input 
@@ -23,18 +23,33 @@ const InputWithDropdown = ({handleEnter, list, placeholder}:{handleEnter: (value
           value={inputValue} 
           list="suggestions" 
           placeholder={placeholder} 
-          onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleEnter(inputValue)
-              setInputValue("")
+          onInput={(e) => {
+            const inputElement = e.target as HTMLInputElement;
+            setInputValue(inputElement.value)
+          }}
+          onChange={(e) => {
+            // Check if the current value matches one of the suggestions exactly
+            const match = filteredSuggestions.find(item => item.name === e.target.value);
+            if (match) {
+              handleEnter(e.target.value);
+              setInputValue("");
             }
-          }
-        }/>
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleEnter(inputValue);
+              setInputValue("");
+            }
+            if (e.key === "Delete" || e.key === "Backspace") {
+              handleDelete && handleDelete();
+            }
+          }}
+        />
         <datalist id="suggestions">
           {filteredSuggestions.map(item => (
             <option 
               key={item.name} value={item.name} 
-              onClick={() => { setInputValue(""); handleEnter(inputValue)}}
+              onClick={() => { console.log("ASEF"); handleEnter(inputValue); setInputValue(""); }}
             >
               {item.name}
             </option>

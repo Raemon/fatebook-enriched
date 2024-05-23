@@ -1,55 +1,71 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useRef } from 'react';
 import { usePopper } from 'react-popper';
 
-interface TooltipProps {
-  text: string;
-  children: React.ReactNode;
-}
-
-const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
+export const Tooltip = ({ children, tooltip, display="inline-block" }:{
+  children:React.ReactNode, 
+  tooltip:React.ReactNode|string,
+  display?:'block'|'inline-block'|'inline'
+}) => {
   const [visible, setVisible] = useState(false);
-  const referenceRef = useRef<HTMLSpanElement>(null);
-  const popperRef = useRef<HTMLDivElement>(null);
-  const { styles, attributes } = usePopper(referenceRef.current, popperRef.current, {
-    placement: 'right',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 8], // Moves the tooltip 8px to the right from the element
-        },
-      },
-    ],
-  });
+  const buttonRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const { styles, attributes } = usePopper(buttonRef.current, tooltipRef.current);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (referenceRef.current && !referenceRef.current.contains(event.target as Node)) {
-        setVisible(false);
-      }
-    };
+  const tooltipStyle = {
+    ...styles.popper,
+    zIndex: 9999,
+    // You can add other styles such as background, color etc.
+    backgroundColor: 'rgba(0,0,0,1)',
+    color: 'white',
+    padding: 6,
+    borderRadius: 4,
+    fontSize: 12,
+    maxWidth: 300,
+    display: 'inline-block',
+  };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [referenceRef]);
+  let timeoutId: NodeJS.Timeout|null = null;
+
+  const showTooltip = () => {
+    setVisible(true);
+  }
+
+  const hideTooltip = () => {
+    timeoutId = setTimeout(() => {
+      setVisible(false);
+    }, 100);  // delay in milliseconds
+  }
+
+  const clearHideTimeout = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
 
   return (
     <>
-      <span ref={referenceRef} onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
+      <div
+        ref={buttonRef}
+        onMouseEnter={showTooltip}
+        onMouseOver={showTooltip}
+        onMouseLeave={hideTooltip}
+        style={{ display: display }}
+      >
         {children}
-      </span>
+      </div>
       {visible && (
-        <div ref={popperRef} style={{ ...styles.popper, zIndex: 9999 }} {...attributes.popper}>
-          <div style={{ backgroundColor: 'white', border: '1px solid black', padding: '8px', borderRadius: '4px', boxShadow: '0px 2px 10px rgba(0,0,0,0.1)' }}>
-            {text}
-          </div>
+        <div
+          ref={tooltipRef}
+          style={tooltipStyle}
+          {...attributes.popper}
+          // onMouseOver={clearHideTimeout}
+          // onMouseLeave={hideTooltip}
+        >
+          {tooltip}
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
 export default Tooltip;
