@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useSubmitQuestion } from '../useFatebook';
-import { Tag, SubmitQuestionData } from '../types';
+import { Tag, SubmitQuestionData, Question } from '../types';
 import InputWithDropdown from './InputWithDropdown';
 import Row from './common/Row';
 
@@ -55,17 +55,22 @@ const useStyles = createUseStyles({
   }
 });
 
-const NewQuestionForm = ({apiKey, tags, fetchQuestions}: {apiKey: string, tags: Tag[], fetchQuestions: () => void}) => {
+const NewQuestionForm = ({apiKey, tags, latestQuestion, fetchQuestions}: {apiKey: string, tags: Tag[], latestQuestion: Question, fetchQuestions: () => void}) => {
   const classes = useStyles();
   const { submitQuestion, isSubmitting, submitError, submitSuccess } = useSubmitQuestion(apiKey);
+
+  const latestQuestionTwoDaysOld = latestQuestion.resolveBy && new Date(latestQuestion.resolveBy) < new Date(new Date().setDate(new Date().getDate() - 2));
+  const defaultTags = latestQuestionTwoDaysOld ? [] : latestQuestion.tags?.map(tag => tag.name) ?? [];
+
   const [formData, setFormData] = useState<SubmitQuestionData>({
     title: '',
     description: '',
     resolveBy: '',
     forecast: undefined,
-    tags: [],
+    tags: defaultTags,
     sharePublicly: false,
   });
+  console.log(latestQuestion)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -117,7 +122,7 @@ const NewQuestionForm = ({apiKey, tags, fetchQuestions}: {apiKey: string, tags: 
           list={tags.map(tag => ({name: tag.name, count: tag.count ?? 1}))}
           placeholder='tags'
           handleEnter={(value) => setFormData((prevFormData: SubmitQuestionData) => ({...prevFormData, tags: Array.from(new Set([...prevFormData.tags ?? [], value]))}))} 
-          handleDelete={() => { console.log("Asdf"); setFormData((prevFormData: SubmitQuestionData) => ({...prevFormData, tags: prevFormData.tags?.slice(0, -1)}))}}
+          handleDelete={() => { setFormData((prevFormData: SubmitQuestionData) => ({...prevFormData, tags: prevFormData.tags?.slice(0, -1)}))}}
         />
       </div>
     </div>

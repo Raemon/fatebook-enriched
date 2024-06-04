@@ -36,7 +36,8 @@ const QuestionsList = ({questions, tags}:{questions: Question[], tags: Tag[]}) =
   const [filterTitles, setFilterTitles] = useState("");
   const [filterTags, setFilterTags] = useState("");
 
-  const filteredQuestions = questions.filter((question) => question.title.toLowerCase().includes(filterTitles.toLowerCase())).filter((question) => question.tags.some((tag) => tag.name.toLowerCase().includes(filterTags.toLowerCase())));
+  const filteredByTitle = filterTitles ? questions.filter((question) => question.title.toLowerCase().includes(filterTitles.toLowerCase())) : questions;
+  const filteredByTags = filterTags ? filteredByTitle.filter((question) => question.tags.some((tag) => tag.name.toLowerCase().includes(filterTags.toLowerCase()))) : filteredByTitle;
 
   return (
     <div className={classes.root}>
@@ -45,13 +46,12 @@ const QuestionsList = ({questions, tags}:{questions: Question[], tags: Tag[]}) =
         <input className={classes.input} type="text" value={filterTitles} onChange={(e) => setFilterTitles(e.target.value)} placeholder="Filter by question"/>
         <input className={classes.input} type="text" value={filterTags} onChange={(e) => setFilterTags(e.target.value)} placeholder="Filter by tag"/>
       </div>
-      {filteredQuestions.length === 0 ? <p>No questions found</p> : null}
-      {filteredQuestions?.map((question: Question, i: number) => {
+      {filteredByTags.length === 0 ? <p>No questions found</p> : null}
+      {filteredByTags?.map((question: Question, i: number) => {
         if (i === 0) {
           return <QuestionItem key={i} question={question} tags={tags} />
         }
         const prevDate = new Date(questions[i-1].createdAt)
-        console.log(i, prevDate)
 
         return <QuestionItem key={i} question={question} prevQuestionDate={prevDate} tags={tags} />
       })}

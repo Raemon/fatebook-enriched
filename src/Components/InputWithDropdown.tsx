@@ -12,7 +12,7 @@ const useStyles = createUseStyles({
   }
 });
 
-const InputWithDropdown = ({handleEnter, handleDelete, list, placeholder}:{handleEnter: (value: string) => void, handleDelete?: () => void, list: {name: string, count: number}[], placeholder?: string}): JSX.Element => {
+const InputWithDropdown = ({handleEnter, handleDelete, list, placeholder}:{handleEnter: (value: string) => void, handleDelete?: (value?: string) => void, list: {name: string, count: number}[], placeholder?: string}): JSX.Element => {
   const classes = useStyles();
   const [inputValue, setInputValue] = useState("")
   const filteredSuggestions = list.filter(item => item.name.toLowerCase().includes(inputValue.toLowerCase())).sort((a, b) => b.count - a.count).slice(0, 10)

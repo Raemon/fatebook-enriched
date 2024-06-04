@@ -3,6 +3,7 @@ import { createUseStyles } from 'react-jss';
 import { Question, Tag } from '../types';
 import classNames from 'classnames';
 import InputWithDropdown from './InputWithDropdown';
+import { useEditQuestion } from '../useFatebook';
 
 const questionItemStyles = createUseStyles({
   root: {
@@ -87,7 +88,7 @@ interface QuestionItemProps {
 const QuestionItem: React.FC<QuestionItemProps> = ({ question, prevQuestionDate, tags }) => {
   const classes = questionItemStyles();
 
-  let resolutionPhrase = "Unresolved";
+  let resolutionPhrase = "UNRESOLVED";
   let resolutionColor = 'rgba(173, 216, 230, 0.2)'; // light blue with some transparency
   switch (question.resolution) {
     case 'AMBIGUOUS':
@@ -106,16 +107,19 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, prevQuestionDate,
 
   const createdAt = question.createdAt.split("T")[0];
   const prevAt = prevQuestionDate?.toISOString().split("T")[0];
-  console.log(question.title)
-  console.log(prevAt, createdAt, prevAt === createdAt)
 
-  const handleEnter = (value: string) => {
+
+  // const { editQuestion, isSubmitting, submitError, submitSuccess } = useEditQuestion(localStorage.get('fatebookApiKey'))
+
+
+
+  const handleTagEnter = (value: string) => {
+    // editQuestion(question.id, {tags: [...question.tags.map(tag => tag.name), value]})
+  }
+  const handleTagDelete = (value?: string) => {
     console.log(value)
   }
-  const handleDelete = (value: string) => {
-    console.log(value)
-  }
-  const list = tags.map(tag => tag.name)
+  const list = tags.map(tag => ({name: tag.name, count: tag.count ?? 0}))
 
   return (
     <div className={classes.root}>
@@ -131,7 +135,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, prevQuestionDate,
           ))}
           <div className={classes.tags}>
             {question.tags.map(tag => <span className={classes.tag} key={tag.id}>{tag.name}</span>)}
-            {/* <InputWithDropdown handleEnter={handleEnter} handleDelete={handleDelete} list={list} placeholder="Add tag" /> */}
+            {/* <InputWithDropdown handleEnter={handleTagEnter} handleDelete={handleTagDelete} list={list} placeholder="Add tag" /> */}
           </div>
           <div className={classes.createdAt}>
             {createdAt}

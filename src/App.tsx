@@ -15,14 +15,21 @@ const useStyles = createUseStyles({
     display: "flex",
     justifyContent: "space-around",
     flexDirection: "row",
+    flexWrap: "wrap",
     padding: 30,
     fontFamily: `"Inter var", ui-sans-serif, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`
   },
-  left: {
-    width: "calc(50% - 60px)"
-  },
   right: {
-    width: "calc(50% - 60px)"
+    width: "calc(50% - 60px)",
+    '@media (max-width: 768px)': {
+      width: "100%"
+    }
+  },
+  left: {
+    width: "calc(50% - 60px)",
+    '@media (max-width: 768px)': {
+      width: "100%"
+    }
   },
   apiKey: {
     display: "flex",
@@ -35,11 +42,6 @@ const useStyles = createUseStyles({
 
 function App() {
 
-  try {
-
-  } catch (e) {
-    console.log(e)
-  }
   const classes = useStyles();
   const [apiKeyInput, setApiKeyInput] = useState("")
   const [apiKey, setApiKey] = useState(localStorage.getItem('fatebookApiKey') ?? "")
@@ -91,12 +93,12 @@ function App() {
 
   return (
     <div className={classes.root}>
+      <div className={classes.left}>
+        <NewQuestionForm apiKey={apiKey} tags={tags} fetchQuestions={fetchQuestions} latestQuestion={questions[0]}/>
+        <QuestionsList questions={questions} tags={tags}/>
+      </div>
       <div className={classes.right}>
         <CalibrationInfo questions={resolvedQuestions} tags={tags} />
-      </div>
-      <div className={classes.left}>
-        <NewQuestionForm apiKey={apiKey} tags={tags} fetchQuestions={fetchQuestions} />
-        <QuestionsList questions={questions} tags={tags}/>
       </div>
     </div>
   );

@@ -22,7 +22,6 @@ export const useFetchQuestions = (apiKey: string) => {
   };
 
   useEffect(() => {
-    console.log("running")
     fetchQuestions();
   }, [apiKey]);
 
@@ -79,10 +78,58 @@ export const useSubmitQuestion = (apiKey: string) => {
       setIsSubmitting(false);
     }
   };
-  console.log("submitError", submitError)
 
   return { submitQuestion, isSubmitting, submitError, submitSuccess };
 };
+
+
+export const useEditQuestion = (apiKey: string) => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
+
+  const editQuestion = async (questionId: string, updateData: Partial<SubmitQuestionData>) => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const queryParams = new URLSearchParams({
+      apiKey: apiKey,
+      ...(updateData.title && { title: updateData.title }),
+      ...(updateData.resolveBy && { resolveBy: updateData.resolveBy }),
+      ...(updateData.forecast && { forecast: updateData.forecast.toString() }),
+      ...(updateData.sharePublicly && { sharePublicly: updateData.sharePublicly ? 'yes' : 'no' }),
+      ...(updateData.hideForecastsUntil && { hideForecastsUntil: updateData.hideForecastsUntil }),
+    });
+
+    updateData.tags?.forEach(tag => queryParams.append('tags', tag));
+    updateData.shareWithLists?.forEach(list => queryParams.append('shareWithLists', list));
+    updateData.shareWithEmail?.forEach(email => queryParams.append('shareWithEmail', email));
+
+    const url = `https://fatebook.io/api/v0/editQuestion/${questionId}?${queryParams.toString()}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description: updateData.description }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to edit question');
+      }
+
+      setSubmitSuccess(true);
+    } catch (error) {
+      setSubmitError(error as Error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return { editQuestion, isSubmitting, submitError, submitSuccess };
+}
 
 
 
