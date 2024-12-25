@@ -4,10 +4,6 @@ import QuestionsList from './Components/QuestionsList';
 import NewQuestionForm from './Components/NewQuestionForm';
 import { useFetchQuestions } from './useFatebook';
 import { Question, Tag } from './types';
-import CalibrationGraph from './Components/CalibrationGraph';
-import countBy from 'lodash/countBy';
-import groupBy from 'lodash/groupBy';
-import CalibrationByPeriod from './Components/CalibrationByPeriod';
 import CalibrationInfo from './Components/CalibrationInfo';
 
 const useStyles = createUseStyles({
@@ -46,7 +42,7 @@ function App() {
   const [apiKeyInput, setApiKeyInput] = useState("")
   const [apiKey, setApiKey] = useState(localStorage.getItem('fatebookApiKey') ?? "")
 
-  const {results, fetchQuestions, isLoading, error} = useFetchQuestions(apiKey)
+  const {results, fetchQuestions, error} = useFetchQuestions(apiKey)
 
   const questions = results?.length > 0 ? results : JSON.parse(localStorage.getItem('questions') || '[]')
   localStorage.setItem('questions', JSON.stringify(questions));
@@ -84,7 +80,7 @@ function App() {
           }
         }} />
         <button onClick={() => handleSetApiKey()}>Submit</button>
-        <p>You can get your API key from the <a href="https://fatebook.io/api-setup" target="_blank">Fatebook API page</a></p>
+        <p>You can get your API key from the <a href="https://fatebook.io/api-setup" target="_blank" rel="noopener noreferrer">Fatebook API page</a></p>
         <p>{error?.message}</p>
       </div>
   }
@@ -92,7 +88,7 @@ function App() {
   const resolvedQuestions = questions.filter((question: Question) => question.resolution === "YES" || question.resolution === "NO")
 
   return (
-    <div className={classes.root}>
+    <div className={`${classes.root}`}>
       <div className={classes.left}>
         <NewQuestionForm apiKey={apiKey} tags={tags} fetchQuestions={fetchQuestions} latestQuestion={questions[0]}/>
         <QuestionsList questions={questions} tags={tags}/>

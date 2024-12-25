@@ -1,71 +1,59 @@
-import React, { useState, useRef } from 'react';
+import { Placement } from '@popperjs/core';
+import { useState, cloneElement } from 'react';
 import { usePopper } from 'react-popper';
+import { createPortal } from 'react-dom';
 
-export const Tooltip = ({ children, tooltip, display="inline-block" }:{
-  children:React.ReactNode, 
-  tooltip:React.ReactNode|string,
-  display?:'block'|'inline-block'|'inline'
-}) => {
+const Tooltip = ({
+  children,
+  content,
+  placement = "top-start"
+}: {
+  children: React.ReactElement;
+  content: React.ReactNode;
+  placement?: Placement
+}): JSX.Element => {
+
   const [visible, setVisible] = useState(false);
-  const buttonRef = useRef(null);
-  const tooltipRef = useRef(null);
-  const { styles, attributes } = usePopper(buttonRef.current, tooltipRef.current);
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
+  const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
 
-  const tooltipStyle = {
-    ...styles.popper,
-    zIndex: 9999,
-    // You can add other styles such as background, color etc.
-    backgroundColor: 'rgba(0,0,0,1)',
-    color: 'white',
-    padding: 6,
-    borderRadius: 4,
-    fontSize: 12,
-    maxWidth: 300,
-    display: 'inline-block',
-  };
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    placement,
+  });
 
-  let timeoutId: NodeJS.Timeout|null = null;
-
-  const showTooltip = () => {
-    setVisible(true);
-  }
-
-  const hideTooltip = () => {
-    timeoutId = setTimeout(() => {
-      setVisible(false);
-    }, 100);  // delay in milliseconds
-  }
-
-  const clearHideTimeout = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
+  // Clone the child element to attach ref and event handlers
+  const child = cloneElement(children, {
+    ref: (node: HTMLElement | null) => {
+      setReferenceElement(node);
+      // Call the original ref, if any
+      const { ref } = children as any;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    },
+    onMouseEnter: () => setVisible(true),
+    onMouseLeave: () => setVisible(false),
+  });
 
   return (
     <>
-      <div
-        ref={buttonRef}
-        onMouseEnter={showTooltip}
-        onMouseOver={showTooltip}
-        onMouseLeave={hideTooltip}
-        style={{ display: display }}
-      >
-        {children}
-      </div>
-      {visible && (
-        <div
-          ref={tooltipRef}
-          style={tooltipStyle}
-          {...attributes.popper}
-          // onMouseOver={clearHideTimeout}
-          // onMouseLeave={hideTooltip}
-        >
-          {tooltip}
-        </div>
-      )}
+      {child}
+      {visible &&
+        createPortal(
+          <div
+            ref={setPopperElement}
+            style={styles.popper}
+            {...attributes.popper}
+            className="bg-white border border-gray-200 rounded-md shadow-lg p-2 text-sm max-w-sm z-50"
+          >
+            {content}
+          </div>,
+          document.body
+        )}
     </>
-  )
-}
+  );
+};
 
 export default Tooltip;

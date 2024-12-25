@@ -57,7 +57,7 @@ const useStyles = createUseStyles({
 
 const NewQuestionForm = ({apiKey, tags, latestQuestion, fetchQuestions}: {apiKey: string, tags: Tag[], latestQuestion: Question, fetchQuestions: () => void}) => {
   const classes = useStyles();
-  const { submitQuestion, isSubmitting, submitError, submitSuccess } = useSubmitQuestion(apiKey);
+  const { submitQuestion, isSubmitting } = useSubmitQuestion(apiKey);
 
   const latestQuestionTwoDaysOld = latestQuestion.resolveBy && new Date(latestQuestion.resolveBy) < new Date(new Date().setDate(new Date().getDate() - 2));
   const defaultTags = latestQuestionTwoDaysOld ? [] : latestQuestion.tags?.map(tag => tag.name) ?? [];

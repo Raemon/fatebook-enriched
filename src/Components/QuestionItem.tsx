@@ -1,9 +1,6 @@
 import React from 'react';
 import { createUseStyles } from 'react-jss';
 import { Question, Tag } from '../types';
-import classNames from 'classnames';
-import InputWithDropdown from './InputWithDropdown';
-import { useEditQuestion } from '../useFatebook';
 
 const questionItemStyles = createUseStyles({
   root: {
@@ -106,20 +103,9 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, prevQuestionDate,
   }
 
   const createdAt = question.createdAt.split("T")[0];
-  const prevAt = prevQuestionDate?.toISOString().split("T")[0];
 
 
   // const { editQuestion, isSubmitting, submitError, submitSuccess } = useEditQuestion(localStorage.get('fatebookApiKey'))
-
-
-
-  const handleTagEnter = (value: string) => {
-    // editQuestion(question.id, {tags: [...question.tags.map(tag => tag.name), value]})
-  }
-  const handleTagDelete = (value?: string) => {
-    console.log(value)
-  }
-  const list = tags.map(tag => ({name: tag.name, count: tag.count ?? 0}))
 
   return (
     <div className={classes.root}>

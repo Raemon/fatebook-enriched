@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import QuestionItem from './QuestionItem';
 import { Question, Tag } from '../types';
-import Row from './common/Row';
 
 const useStyles = createUseStyles({
   root: {

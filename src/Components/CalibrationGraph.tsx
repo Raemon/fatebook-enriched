@@ -80,7 +80,7 @@ const CalibrationGraph = ({forecasts, title}:{forecasts: ExtendedForecast[], tit
           return (
               <span key={probability} style={{position: "absolute", bottom, left}} title={`forecast: ${probability}%, result: ${calibrationByProbability[probability].result}%, count: ${calibrationByProbability[probability].count}`}
               >
-                <Tooltip tooltip={`forecast: ${probability}%, result: ${calibrationByProbability[probability].result}%, count: ${calibrationByProbability[probability].count}`}>
+                <Tooltip content={`forecast: ${probability}%, result: ${calibrationByProbability[probability].result}%, count: ${calibrationByProbability[probability].count}`}>
                   <span className={classes.smallDot} style={{ background: `rgba(0,0,0, ${4*calibrationByProbability[probability].density})`}}/>
                 </Tooltip>
             </span>
@@ -91,7 +91,7 @@ const CalibrationGraph = ({forecasts, title}:{forecasts: ExtendedForecast[], tit
           const left = `${parseFloat(probability)*10}%`;
           return (
               <span key={probability + title} style={{ bottom, left, position: "absolute"}}>
-                <Tooltip tooltip={`forecast: ${probability}0%, result: ${calibrationByDecileProbability[probability].result}%, count: ${calibrationByDecileProbability[probability].count}`}>
+                <Tooltip content={`forecast: ${probability}0%, result: ${calibrationByDecileProbability[probability].result}%, count: ${calibrationByDecileProbability[probability].count}`}>
                   <span className={classes.bigDot} style={{ background: `rgba(100,0,200, ${calibrationByDecileProbability[probability].density})`}}/>
                 </Tooltip>
               </span>
